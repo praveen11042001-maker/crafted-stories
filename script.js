@@ -18,14 +18,11 @@ function App() {
   const [address, setAddress] = React.useState("");
   const [selectedProduct, setSelectedProduct] = React.useState(null);
   const [filter, setFilter] = React.useState('All');
-  
-  // Reviews & Q&A States
-  const [reviews, setReviews] = React.useState([{name: "Ananya", text: "Absolutely stunning work! The pearls are high quality.", stars: 5}]);
-  const [reviewInput, setReviewInput] = React.useState({name: "", text: ""});
+  const [reviews, setReviews] = React.useState([{name: "Sneha", text: "The ocean coasters look so real!", stars: 5}]);
 
   const addToCart = (product, redirect = false) => {
     const exist = cart.find(x => x.id === product.id);
-    if (exist && exist.qty >= 10) return alert("Limit 10 per piece.");
+    if (exist && exist.qty >= 10) return alert("Limit 10 per design.");
     setCart(exist ? cart.map(x => x.id === product.id ? {...exist, qty: exist.qty + 1} : x) : [...cart, {...product, qty: 1}]);
     if (redirect) setView('cart');
   };
@@ -34,108 +31,144 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* --- SIDEBAR NAVIGATION --- */}
-      <aside className="w-full md:w-64 bg-white/90 backdrop-blur-md border-r border-rose-100 p-6 flex flex-col z-50">
-        <h1 className="serif text-2xl font-bold mb-10 cursor-pointer" onClick={() => setView('home')}>Crafted Stories</h1>
+      <div className="resin-bg-overlay"></div>
+      
+      {/* --- SIDEBAR --- */}
+      <aside className="w-full md:w-72 bg-white/95 backdrop-blur-md border-r border-rose-100 p-8 flex flex-col z-50">
+        <h1 className="serif text-3xl font-bold mb-10 cursor-pointer tracking-tighter" onClick={() => setView('home')}>Crafted Stories</h1>
         
-        <nav className="space-y-4 flex-grow">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Collections</p>
-            {['All', 'Jewelry', 'Resin Art'].map(cat => (
-                <button key={cat} onClick={() => {setFilter(cat); setView('home');}} className={`block text-sm ${filter === cat ? 'text-[#C5A059] font-bold' : 'text-gray-500'} hover:text-[#C5A059]`}>{cat}</button>
-            ))}
+        <nav className="space-y-6 flex-grow">
+            <div>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-4">Collections</p>
+                {['All', 'Jewelry', 'Resin Art'].map(cat => (
+                    <button key={cat} onClick={() => {setFilter(cat); setView('home');}} className={`block w-full text-left py-2 text-sm transition-all ${filter === cat ? 'text-[#C5A059] font-bold translate-x-2' : 'text-gray-500 hover:text-black'}`}>{cat}</button>
+                ))}
+            </div>
         </nav>
 
-        <div className="mt-10 pt-6 border-t border-rose-50 space-y-4">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Contact Us</p>
-            <a href={`https://wa.me/${CONTACTS.phone}`} className="flex items-center gap-2 text-xs text-gray-600"><i data-lucide="phone" className="w-3"></i> Support</a>
-            <a href={`https://instagram.com/${CONTACTS.insta}`} className="flex items-center gap-2 text-xs text-gray-600"><i data-lucide="instagram" className="w-3"></i> Instagram</a>
-            <p className="text-[9px] text-gray-400 truncate">{CONTACTS.email}</p>
+        <div className="pt-8 border-t border-rose-100 space-y-4">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em]">Contact Us</p>
+            <div className="text-xs text-gray-600 space-y-2">
+                <p className="flex items-center gap-2"><i data-lucide="phone" className="w-3"></i> +{CONTACTS.phone}</p>
+                <p className="flex items-center gap-2"><i data-lucide="mail" className="w-3"></i> {CONTACTS.email}</p>
+                <a href={`https://instagram.com/${CONTACTS.insta}`} className="flex items-center gap-2 text-[#C5A059] font-bold"><i data-lucide="instagram" className="w-3"></i> @{CONTACTS.insta}</a>
+            </div>
         </div>
       </aside>
 
-      {/* --- MAIN CONTENT --- */}
-      <main className="flex-grow relative h-screen overflow-y-auto p-6 md:p-12">
+      {/* --- MAIN AREA --- */}
+      <main className="flex-grow h-screen overflow-y-auto p-6 md:p-12">
+        {/* Navigation Bar */}
+        <div className="flex justify-between items-center mb-12">
+            <h2 className="serif text-4xl italic text-gray-800">{view === 'cart' ? 'Checkout' : filter}</h2>
+            <div className="relative cursor-pointer p-3 bg-white rounded-full shadow-md" onClick={() => setView('cart')}>
+                <i data-lucide="shopping-bag" className="w-5 h-5"></i>
+                {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-[#C5A059] text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-bold">{cart.reduce((a,c)=>a+c.qty,0)}</span>}
+            </div>
+        </div>
+
+        {/* HOME VIEW */}
         {view === 'home' && (
           <div className="page-slide-up">
-            <div className="flex justify-between items-center mb-10">
-                <h2 className="serif text-4xl italic">{filter} Designs</h2>
-                <div className="relative cursor-pointer" onClick={() => setView('cart')}>
-                    <i data-lucide="shopping-bag"></i>
-                    {cart.length > 0 && <span className="absolute -top-2 -right-2 bg-black text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center">{cart.reduce((a,c) => a+c.qty, 0)}</span>}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
               {filteredProducts.map(p => (
-                <div key={p.id} className="luxury-card rounded-[2rem] bg-white/60 p-3 shadow-lg group">
-                  <img src={p.img} className="h-72 w-full object-cover rounded-[1.5rem] cursor-pointer" onClick={() => {setSelectedProduct(p); setView('detail');}} />
-                  <div className="p-4">
-                    <h3 className="serif text-lg">{p.name}</h3>
-                    <p className="text-[#C5A059] font-bold mb-4">₹{p.price}</p>
-                    <div className="flex gap-2">
-                        <button onClick={() => addToCart(p)} className="flex-1 border border-black text-[9px] py-2 rounded-full uppercase font-bold">Add to Bag</button>
-                        <button onClick={() => addToCart(p, true)} className="flex-1 bg-black text-white text-[9px] py-2 rounded-full uppercase font-bold">Buy Now</button>
+                <div key={p.id} className="luxury-card rounded-[2.5rem] bg-white/70 p-4 shadow-xl group border border-white">
+                  <img src={p.img} className="h-80 w-full object-cover rounded-[2rem] cursor-pointer" onClick={() => {setSelectedProduct(p); setView('detail');}} />
+                  <div className="p-6 text-center">
+                    <h3 className="serif text-xl mb-2">{p.name}</h3>
+                    <p className="text-[#C5A059] font-bold mb-6 italic">₹{p.price}</p>
+                    <div className="flex gap-3">
+                        <button onClick={() => addToCart(p)} className="flex-1 border border-black text-[10px] py-3 rounded-full uppercase font-bold hover:bg-black hover:text-white transition-all">Add to Bag</button>
+                        <button onClick={() => addToCart(p, true)} className="flex-1 bg-black text-white text-[10px] py-3 rounded-full uppercase font-bold shadow-lg">Buy Now</button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* --- REVIEWS & FAQ SECTION --- */}
-            <section className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-12 border-t border-rose-100 pt-16">
+            {/* Q&A and Reviews Section */}
+            <div className="mt-24 grid grid-cols-1 lg:grid-cols-2 gap-16 pb-20">
                 <div>
-                    <h3 className="serif text-3xl mb-6 italic">Customer Reviews</h3>
-                    <div className="space-y-4 mb-8">
+                    <h3 className="serif text-3xl mb-8 border-b pb-4">Customer Love</h3>
+                    <div className="space-y-4">
                         {reviews.map((r, i) => (
-                            <div key={i} className="bg-white/40 p-4 rounded-2xl">
-                                <p className="font-bold text-xs">{r.name} ⭐⭐⭐⭐⭐</p>
+                            <div key={i} className="bg-white/50 p-6 rounded-[2rem] border border-white">
+                                <p className="font-bold text-xs mb-1 text-[#C5A059]">{r.name} ⭐⭐⭐⭐⭐</p>
                                 <p className="text-sm text-gray-600 italic">"{r.text}"</p>
                             </div>
                         ))}
                     </div>
-                    <div className="space-y-2">
-                        <input className="w-full p-3 rounded-xl bg-white/80 text-xs outline-none" placeholder="Your Name" onChange={e => setReviewInput({...reviewInput, name: e.target.value})} />
-                        <textarea className="w-full p-3 rounded-xl bg-white/80 text-xs outline-none" placeholder="Share your experience..." onChange={e => setReviewInput({...reviewInput, text: e.target.value})} />
-                        <button onClick={() => {setReviews([...reviews, reviewInput]); alert("Review Posted!");}} className="bg-black text-white px-6 py-2 rounded-full text-[10px] font-bold">Post Review</button>
-                    </div>
                 </div>
                 <div>
-                    <h3 className="serif text-3xl mb-6 italic">Handcraft Q&A</h3>
-                    <div className="space-y-4 text-sm">
-                        <details className="cursor-pointer bg-white/40 p-4 rounded-xl">
-                            <summary className="font-bold">How long does shipping take?</summary>
-                            <p className="mt-2 text-gray-500">Since everything is handmade, we ship within 3-5 days across India.</p>
-                        </details>
-                        <details className="cursor-pointer bg-white/40 p-4 rounded-xl">
-                            <summary className="font-bold">Is the resin heat resistant?</summary>
-                            <p className="mt-2 text-gray-500">Yes! Our coasters handle hot coffee cups perfectly up to 90°C.</p>
+                    <h3 className="serif text-3xl mb-8 border-b pb-4">FAQs</h3>
+                    <div className="space-y-4">
+                        <details className="group bg-white/50 p-4 rounded-2xl border border-white cursor-pointer">
+                            <summary className="font-bold text-sm">Is it handmade?</summary>
+                            <p className="mt-3 text-sm text-gray-500">Yes, every single piece is poured and polished by hand.</p>
                         </details>
                     </div>
                 </div>
-            </section>
+            </div>
           </div>
         )}
 
-        {view === 'cart' && (
-            <div className="max-w-xl mx-auto page-slide-up">
-                <h2 className="serif text-4xl mb-10 italic">Complete Purchase</h2>
-                {cart.length === 0 ? <p>Your bag is empty.</p> : (
-                    <div className="space-y-4">
-                        {cart.map((item, i) => (
-                            <div key={i} className="flex justify-between bg-white/80 p-5 rounded-2xl shadow-sm">
-                                <span className="font-bold">{item.name} (x{item.qty})</span>
-                                <span>₹{item.price * item.qty}</span>
-                            </div>
-                        ))}
-                        <div className="bg-white p-8 rounded-[2rem] shadow-xl mt-10">
-                            <p className="serif text-lg mb-4">Shipping Details</p>
-                            <textarea className="w-full border p-4 rounded-xl mb-6 text-sm outline-none" placeholder="Full Name, Pincode, Address..." onChange={e => setAddress(e.target.value)} />
-                            <div className="flex justify-between text-2xl font-bold mb-8 italic"><span>Total</span><span>₹{cart.reduce((s,i)=>s+(i.price*i.qty),0)}</span></div>
-                            <button onClick={() => { if(address.length < 10) return alert("Enter full address"); window.open(`https://wa.me/${CONTACTS.phone}?text=Order: ${cart.map(i=>i.name).join(",")}%0ATotal: ${cart.reduce((s,i)=>s+(i.price*i.qty),0)}%0AAddr: ${address}`); }} className="w-full bg-[#25D366] text-white py-4 rounded-full font-bold flex items-center justify-center gap-2 shadow-lg">Confirm on WhatsApp</button>
-                        </div>
-                    </div>
-                )}
+        {/* DETAIL VIEW - FIXED BLANK PAGE ISSUE */}
+        {view === 'detail' && selectedProduct && (
+          <div className="page-slide-up max-w-4xl mx-auto">
+            <button onClick={() => setView('home')} className="mb-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-black">← Back to Gallery</button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-white/90 p-10 rounded-[3.5rem] shadow-2xl items-center">
+              <img src={selectedProduct.img} className="w-full h-[500px] object-cover rounded-[2.5rem]" />
+              <div className="space-y-6">
+                <span className="text-[#C5A059] text-[10px] font-bold uppercase tracking-[0.3em]">{selectedProduct.category}</span>
+                <h2 className="serif text-5xl italic">{selectedProduct.name}</h2>
+                <p className="text-3xl font-light">₹{selectedProduct.price}</p>
+                <p className="text-gray-500 italic leading-relaxed">"Individually crafted resin art designed to bring luxury to your everyday life."</p>
+                <div className="flex flex-col gap-4 pt-4">
+                    <button onClick={() => addToCart(selectedProduct)} className="w-full border border-black py-4 rounded-full font-bold uppercase text-[10px] tracking-widest hover:bg-black hover:text-white">Add to Bag</button>
+                    <button onClick={() => addToCart(selectedProduct, true)} className="w-full bg-black text-white py-4 rounded-full font-bold uppercase text-[10px] tracking-widest shadow-xl">Buy Now</button>
+                </div>
+              </div>
             </div>
+          </div>
+        )}
+
+        {/* CART VIEW */}
+        {view === 'cart' && (
+          <div className="max-w-xl mx-auto page-slide-up pb-20">
+            {cart.length === 0 ? (
+                <div className="text-center py-20">
+                    <p className="text-gray-400 mb-6 italic">Your bag is empty.</p>
+                    <button onClick={() => setView('home')} className="text-[#C5A059] font-bold underline">Go Shopping</button>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    {cart.map((item, i) => (
+                        <div key={i} className="flex justify-between items-center bg-white p-6 rounded-[2rem] shadow-sm border border-rose-50">
+                            <div>
+                                <p className="font-bold">{item.name}</p>
+                                <p className="text-[#C5A059] text-sm">₹{item.price}</p>
+                            </div>
+                            <div className="flex items-center gap-4 bg-gray-50 px-4 py-2 rounded-full border">
+                                <button onClick={() => removeFromCart(item)} className="font-bold text-lg">-</button>
+                                <span className="font-bold text-sm">{item.qty}</span>
+                                <button onClick={() => addToCart(item)} className="font-bold text-lg">+</button>
+                            </div>
+                        </div>
+                    ))}
+                    <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-rose-50 mt-10">
+                        <h4 className="serif text-2xl mb-6 italic">Shipping Address</h4>
+                        <textarea className="w-full bg-gray-50/50 border border-gray-100 p-6 rounded-[2rem] text-sm mb-8 outline-none focus:ring-2 focus:ring-[#C5A059]/10" placeholder="Full Name, Pincode, Complete Address..." rows="4" onChange={e => setAddress(e.target.value)} />
+                        <div className="flex justify-between text-3xl font-bold serif mb-10 border-t pt-6 italic">
+                            <span>Total</span>
+                            <span>₹{cart.reduce((s,i)=>s+(i.price*i.qty),0)}</span>
+                        </div>
+                        <button onClick={() => { if(address.length < 10) return alert("Please enter full address"); window.open(`https://wa.me/${CONTACTS.phone}?text=Order Details:%0A${cart.map(i=>`${i.name} x${i.qty}`).join('%0A')}%0ATotal: ₹${cart.reduce((s,i)=>s+(i.price*i.qty),0)}%0AAddr: ${address}`); }} className="w-full bg-[#25D366] text-white py-6 rounded-full font-bold shadow-xl flex items-center justify-center gap-3">
+                            <i data-lucide="message-circle"></i> Place Order on WhatsApp
+                        </button>
+                    </div>
+                </div>
+            )}
+          </div>
         )}
       </main>
     </div>
