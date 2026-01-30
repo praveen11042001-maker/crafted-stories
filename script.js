@@ -1,4 +1,5 @@
 const PHONE = "918106676763";
+const UPI_ID = "8106676763-2@ybl"; // Your specific UPI ID
 const INSTA_ID = "craftedstories._";
 const EMAIL = "praveen11042001@gmail.com";
 
@@ -10,32 +11,39 @@ const products = [
 ];
 
 function App() {
-  const [selectedProduct, setSelectedProduct] = React.useState(null);
   const [address, setAddress] = React.useState("");
 
-  const sendWhatsApp = (pName, pPrice, method) => {
+  // FUNCTION 1: DIRECT UPI PAYMENT (PhonePe/GPay/Paytm)
+  const handleDirectPay = (pName, pPrice) => {
     if (!address.trim()) {
-      alert("Please enter your shipping address first!");
+      alert("Please enter your shipping address first so we know where to send your order!");
       return;
     }
     
-    const intent = method === 'check' 
-      ? `Check Availability & Order` 
-      : `Order & Pay via UPI`;
-
-    const text = `Hi Crafted Stories! 👋%0A%0A*New Order Request*%0AItem: ${pName}%0APrice: ₹${pPrice}%0A%0A*Shipping Address:*%0A${address}%0A%0A*Action:* I want to ${intent}. Please guide me for payment to 8106676763.`;
+    // This link triggers the UPI apps on the user's phone
+    const upiLink = `upi://pay?pa=${UPI_ID}&pn=Crafted%20Stories&am=${pPrice}&cu=INR&tn=Order%20for%20${pName}`;
     
+    window.location.href = upiLink;
+
+    // Optional: Also send address to WhatsApp after 2 seconds so you have their details
+    setTimeout(() => {
+        const text = `Hi! I just initiated a Direct Payment for *${pName}* (₹${pPrice}).%0A%0A*My Shipping Address is:*%0A${address}`;
+        window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
+    }, 2000);
+  };
+
+  // FUNCTION 2: CHECK AVAILABILITY VIA WHATSAPP
+  const checkAvailability = (pName, pPrice) => {
+    const text = `Hi Crafted Stories! 👋%0A%0AIs *${pName}* (₹${pPrice}) available?%0A%0A*My Address:*%0A${address || 'Not provided yet'}`;
     window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
   };
 
   return (
     <div>
-      {/* Floating WhatsApp */}
       <a href={`https://wa.me/${PHONE}`} className="fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-xl z-50 hover:scale-110 transition-transform">
         <i data-lucide="message-circle"></i>
       </a>
 
-      {/* Navigation */}
       <nav className="flex justify-between items-center px-[5%] py-5 bg-white sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2">
           <i data-lucide="heart" className="text-rose-400 fill-rose-400"></i>
@@ -48,26 +56,18 @@ function App() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="rose-gradient text-center py-20 px-5">
+      <section className="rose-gradient text-center py-16 px-5">
         <h1 className="serif text-5xl md:text-7xl mb-6">Handmade with Love,<br/>Built with Soul.</h1>
-        <p className="text-lg max-w-2xl mx-auto mb-10 text-gray-600">
-          Two sisters, Jyothi & Preethi Reddy, turning childhood struggles into independent artistry. Unique jewelry & resin art.
-        </p>
-        <a href="#shop" className="bg-rose-500 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-rose-600 shadow-lg">Explore Collection</a>
+        <p className="text-lg max-w-2xl mx-auto mb-10 text-gray-600">Handmade by Jyothi & Preethi Reddy.</p>
+        <a href="#shop" className="bg-rose-500 text-white px-10 py-4 rounded-full font-bold shadow-lg">Shop Now</a>
       </section>
 
-      {/* Shop */}
       <section id="shop" className="py-20 px-[5%]">
-        <h2 className="serif text-center text-4xl mb-4">The Collection</h2>
-        <p className="text-center text-gray-500 mb-12 italic text-sm">Step 1: Enter your address below | Step 2: Click Order on your favorite item</p>
-        
-        {/* Address Entry Section */}
-        <div className="max-w-xl mx-auto mb-12 bg-white p-6 rounded-2xl border-2 border-dashed border-rose-200">
-          <label className="block text-sm font-bold text-rose-600 mb-2 uppercase">Delivery Address (Required)</label>
+        <div className="max-w-xl mx-auto mb-12 bg-white p-6 rounded-2xl border-2 border-dashed border-rose-200 shadow-inner">
+          <label className="block text-sm font-bold text-rose-600 mb-2 uppercase tracking-widest">Step 1: Enter Shipping Address</label>
           <textarea 
-            className="w-full p-4 border border-rose-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300" 
-            placeholder="Enter your full name, house no, area, city, and pincode..."
+            className="w-full p-4 border border-rose-100 rounded-xl focus:ring-2 focus:ring-rose-300" 
+            placeholder="Full Name, House No, City, Pincode..."
             rows="3"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -78,12 +78,12 @@ function App() {
           {products.map(p => (
             <div key={p.id} className="bg-white rounded-3xl overflow-hidden border border-rose-100 shadow-sm flex flex-col">
               <img src={p.img} alt={p.name} className="w-full h-72 object-cover" />
-              <div className="p-6 flex-grow">
+              <div className="p-6">
                 <h3 className="text-xl font-bold mb-2">{p.name}</h3>
                 <span className="text-2xl font-bold text-rose-500">₹{p.price}</span>
                 <div className="mt-4 flex flex-col gap-2">
-                  <button onClick={() => sendWhatsApp(p.name, p.price, 'pay')} className="w-full bg-rose-500 text-white py-3 rounded-xl font-bold text-sm hover:bg-rose-600 transition-colors">Pay Now via UPI</button>
-                  <button onClick={() => sendWhatsApp(p.name, p.price, 'check')} className="w-full border border-rose-500 text-rose-500 py-3 rounded-xl font-bold text-sm hover:bg-rose-50">Check Availability First</button>
+                  <button onClick={() => handleDirectPay(p.name, p.price)} className="w-full bg-rose-500 text-white py-3 rounded-xl font-bold hover:bg-rose-600">Pay Now (UPI)</button>
+                  <button onClick={() => checkAvailability(p.name, p.price)} className="w-full border border-rose-500 text-rose-500 py-3 rounded-xl font-bold hover:bg-rose-50">Check Availability</button>
                 </div>
               </div>
             </div>
@@ -91,31 +91,22 @@ function App() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer id="contact" className="bg-gray-900 text-white py-16 px-[5%]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <div>
-            <h3 className="serif text-2xl mb-6 text-rose-400">Connect With Us</h3>
-            <a href={`tel:+91${PHONE}`} className="flex items-center gap-3 mb-4 hover:text-rose-400">
-              <i data-lucide="phone" className="w-5 h-5"></i> +91 {PHONE}
-            </a>
-            <a href={`mailto:${EMAIL}`} className="flex items-center gap-3 mb-4 hover:text-rose-400">
-              <i data-lucide="mail" className="w-5 h-5"></i> {EMAIL}
-            </a>
-            <a href={`https://instagram.com/${INSTA_ID}`} target="_blank" className="flex items-center gap-3 hover:text-rose-400">
-              <i data-lucide="instagram" className="w-5 h-5"></i> @{INSTA_ID}
-            </a>
+            <h3 className="serif text-2xl mb-6 text-rose-400">Contact</h3>
+            <a href={`tel:+91${PHONE}`} className="block mb-2 hover:text-rose-400">📞 +91 {PHONE}</a>
+            <a href={`mailto:${EMAIL}`} className="block mb-2 hover:text-rose-400">✉️ {EMAIL}</a>
+            <a href={`https://instagram.com/${INSTA_ID}`} target="_blank" className="block hover:text-rose-400">📸 @{INSTA_ID}</a>
           </div>
           <div>
-            <h3 className="serif text-2xl mb-6 text-rose-400">Payment Center</h3>
-            <p className="text-gray-400 mb-2 italic">Official PhonePe / GPay Number:</p>
-            <p className="text-3xl font-bold tracking-wider">{PHONE}</p>
+            <h3 className="serif text-2xl mb-6 text-rose-400">Payments</h3>
+            <p className="text-gray-400">Accepted: PhonePe, GPay, Paytm</p>
+            <p className="text-xl font-bold mt-2 text-white">{UPI_ID}</p>
           </div>
           <div>
-            <h3 className="serif text-2xl mb-6 text-rose-400">Our Promise</h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Every item is handmade by Jyothi & Preethi Reddy. We ensure safe packaging and delivery across India. Support sister-led businesses!
-            </p>
+            <h3 className="serif text-2xl mb-6 text-rose-400">Location</h3>
+            <p className="text-gray-400">Shipping all over India from Andhra Pradesh.</p>
           </div>
         </div>
       </footer>
