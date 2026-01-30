@@ -1,41 +1,57 @@
 :root {
-    --rose-soft: #FFF5F6;
     --gold: #C5A059;
+    --charcoal: #1a1a1a;
 }
 
 body {
     font-family: 'Montserrat', sans-serif;
-    background-color: var(--rose-soft);
-    overflow-x: hidden;
+    color: var(--charcoal);
+    margin: 0;
+    background: #fff;
 }
 
 .serif { font-family: 'Playfair Display', serif; }
 
-/* 3D Glass Effect */
+/* Dynamic Resin Background */
+.resin-bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://images.unsplash.com/photo-1599408162165-403884112e3e?auto=format&fit=crop&q=80&w=2000');
+    background-size: cover;
+    background-attachment: fixed;
+    opacity: 0.12;
+    z-index: -1;
+    filter: blur(5px);
+}
+
+/* Glassmorphism Cards */
 .glass-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .glass-card:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 30px 60px rgba(197, 160, 89, 0.15);
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 25px 50px rgba(197, 160, 89, 0.15);
 }
 
-/* 3D Page Slide Animation */
-.page-enter {
-    animation: slideIn 0.6s ease-out forwards;
+/* Page Transition */
+.page-anim {
+    animation: fadeInSlide 0.7s ease-out;
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(50px) rotateY(-5deg); }
-    to { opacity: 1; transform: translateX(0) rotateY(0); }
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .btn-luxury {
-    background: linear-gradient(135deg, #2D2D2D 0%, #000000 100%);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #C5A059 0%, #B38E46 100%);
+    color: white;
 }
