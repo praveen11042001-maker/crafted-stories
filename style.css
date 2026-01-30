@@ -4,7 +4,7 @@ body {
     font-family: 'Montserrat', sans-serif;
     margin: 0;
     background: #fff;
-    overflow: hidden;
+    overflow: hidden; /* Main window scroll is handled inside the <main> tag */
 }
 
 .serif { font-family: 'Playfair Display', serif; }
@@ -15,17 +15,23 @@ body {
     width: 100%; height: 100%;
     background-image: url('https://images.unsplash.com/photo-1599408162165-403884112e3e?auto=format&fit=crop&q=80&w=2000');
     background-size: cover;
-    opacity: 0.15;
+    opacity: 0.15; /* Light visibility */
     z-index: -1;
 }
 
-.luxury-card { transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
-.luxury-card:hover { transform: translateY(-8px); shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.luxury-card { transition: all 0.4s ease; }
+.luxury-card:hover { transform: translateY(-10px); }
 
-.page-slide-up { animation: slideUp 0.8s ease-out; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.page-slide-up { animation: slideUp 0.7s cubic-bezier(0.19, 1, 0.22, 1); }
+@keyframes slideUp { 
+    from { opacity: 0; transform: translateY(30px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
 
-/* Responsive Sidebar Adjustment */
+/* Custom Scrollbar for Luxury Feel */
+main::-webkit-scrollbar { width: 5px; }
+main::-webkit-scrollbar-thumb { background: #C5A059; border-radius: 10px; }
+
 @media (max-width: 768px) {
     body { overflow-y: auto; }
     main { height: auto; overflow: visible; }
