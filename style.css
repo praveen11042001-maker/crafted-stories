@@ -1,0 +1,49 @@
+/* Custom CSS Variables for a Luxury Feel */
+:root {
+    --gold: #C5A059;
+    --rose-light: #FFF5F6;
+    --charcoal: #2D2D2D;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--rose-light);
+    color: var(--charcoal);
+}
+
+.serif { font-family: 'Playfair Display', serif; }
+
+/* Elegant Glass Navigation */
+.glass-nav {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+}
+
+/* Soft Hover Animation for Product Cards */
+.product-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: white;
+}
+
+.product-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+/* Gold Gradient Button */
+.btn-luxury {
+    background: linear-gradient(135deg, #C5A059 0%, #E2C285 100%);
+    color: white;
+    transition: opacity 0.3s;
+}
+
+.btn-luxury:hover {
+    opacity: 0.9;
+    letter-spacing: 1px;
+}
+
+/* Animated Scroll Bar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--rose-light); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
