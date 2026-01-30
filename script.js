@@ -1,117 +1,200 @@
-const PHONE = "918106676763";
-const INSTA_ID = "craftedstories._";
-const EMAIL = "praveen11042001@gmail.com";
+const PHONE_OWNER = "918106676763";
+const UPI_ID = "8106676763-2@ybl";
+
+// --- PASTE YOUR FIREBASE KEYS HERE ---
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 
 const products = [
-  { id: 1, name: "Pearl Bridal Earrings", price: 599, category: "Jewelry", img: "https://images.unsplash.com/photo-1528797664208-e5a8c0b98881" },
-  { id: 2, name: "Ocean Resin Coasters", price: 599, category: "Resin", img: "https://images.unsplash.com/photo-1713097458865-34f9821d60f3" },
-  { id: 3, name: "Floral Necklace Set", price: 1299, category: "Jewelry", img: "https://images.unsplash.com/photo-1722510825242-0d8f2064c2e2" },
-  { id: 4, name: "Resin Jewelry Tray", price: 799, category: "Resin", img: "https://images.pexels.com/photos/7256631/pexels-photo-7256631.jpeg" }
+  { id: 1, name: "Pearl Bridal Earrings", price: 599, category: "Jewelry", desc: "Each pearl is hand-selected and wired with precision. We spend hours on every pair to ensure they catch the light perfectly for your special day. Handmade with love by sisters.", img: "https://images.unsplash.com/photo-1528797664208-e5a8c0b98881" },
+  { id: 2, name: "Ocean Resin Coasters", price: 599, category: "Resin", desc: "Crafted using premium high-gloss resin. We layer pigments over 48 hours to create realistic waves that bring the beauty of the ocean to your home.", img: "https://images.unsplash.com/photo-1713097458865-34f9821d60f3" },
+  { id: 3, name: "Floral Necklace Set", price: 1299, category: "Jewelry", desc: "Real preserved flowers encased in crystal resin. This delicate process preserves nature's beauty forever in a wearable form.", img: "https://images.unsplash.com/photo-1722510825242-0d8f2064c2e2" }
 ];
 
 function App() {
+  const [view, setView] = React.useState('home'); // home, detail, cart
+  const [user, setUser] = React.useState(null);
+  const [selectedProduct, setSelectedProduct] = React.useState(null);
+  const [cart, setCart] = React.useState([]);
   const [address, setAddress] = React.useState("");
-  const [filter, setFilter] = React.useState("All");
+  const [phoneNumber, setPhoneNumber] = React.useState("");
+  const [otp, setOtp] = React.useState("");
+  const [showOtpField, setShowOtpField] = React.useState(false);
 
-  const handleOrder = (pName, pPrice, isInstant) => {
-    if (!address.trim()) {
-      alert("Kindly provide your shipping address first so we can assist you better.");
-      return;
-    }
-    const message = isInstant 
-      ? `Hi Crafted Stories! 🌟%0A%0A*NEW ORDER*%0AI wish to purchase *${pName}* (₹${pPrice}) right now.%0A%0A*Shipping Details:* ${address}%0A%0APlease share your payment QR code.`
-      : `Hi Crafted Stories! 🌸%0A%0AIs *${pName}* (₹${pPrice}) available for shipping?%0A%0AMy Address: ${address}`;
-
-    window.open(`https://wa.me/${PHONE}?text=${message}`, '_blank');
+  // OTP Login Logic
+  const setupRecaptcha = () => {
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      'size': 'normal'
+    });
   };
 
-  const filteredItems = filter === "All" ? products : products.filter(p => p.category === filter);
+  const handleSendOtp = () => {
+    if (!phoneNumber) return alert("Enter number with country code (e.g. 91...)");
+    setupRecaptcha();
+    const appVerifier = window.recaptchaVerifier;
+    firebase.auth().signInWithPhoneNumber("+" + phoneNumber, appVerifier)
+      .then((confirmationResult) => {
+        window.confirmationResult = confirmationResult;
+        setShowOtpField(true);
+      }).catch((error) => alert("Error: " + error.message));
+  };
+
+  const handleVerifyOtp = () => {
+    window.confirmationResult.confirm(otp)
+      .then((result) => setUser(result.user))
+      .catch((error) => alert("Invalid OTP"));
+  };
+
+  const addToCart = (product) => {
+    setCart([...cart, product]);
+    alert("Added to cart! Total items: " + (cart.length + 1));
+  };
+
+  const sendOrderToWhatsApp = () => {
+    if (!address) return alert("Please enter your shipping address!");
+    const items = cart.map(i => i.name).join(", ");
+    const total = cart.reduce((sum, i) => sum + i.price, 0);
+    const text = `*NEW ORDER FROM WEBSITE*%0A%0A*Items:* ${items}%0A*Total Amount:* ₹${total}%0A*Shipping Address:* ${address}%0A%0A_Ready to pay via UPI ID: ${UPI_ID}_`;
+    window.open(`https://wa.me/${PHONE_OWNER}?text=${text}`, '_blank');
+  };
+
+  // Login View
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-white">
+        <h1 className="serif text-4xl mb-2 text-center">Crafted Stories</h1>
+        <p className="text-gray-400 mb-8 uppercase tracking-widest text-xs">Authentic Sister-Made Art</p>
+        <div id="recaptcha-container" className="mb-4"></div>
+        <input 
+          className="border-b-2 border-gray-100 p-4 w-full max-w-xs text-center outline-none focus:border-rose-300 transition-all" 
+          placeholder="Enter Mobile (91...)" 
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+        />
+        {showOtpField && (
+          <input 
+            className="border-b-2 border-gray-100 p-4 w-full max-w-xs text-center mt-4 outline-none focus:border-rose-300" 
+            placeholder="Enter 6-Digit OTP" 
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+          />
+        )}
+        <button 
+          onClick={showOtpField ? handleVerifyOtp : handleSendOtp}
+          className="mt-8 bg-black text-white px-12 py-4 rounded-full font-bold uppercase tracking-tighter hover:bg-gray-800"
+        >
+          {showOtpField ? "Verify & Enter" : "Send OTP"}
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen">
-      <nav className="glass-nav flex justify-between items-center px-8 py-4 sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <i data-lucide="sparkles" className="text-[#C5A059]"></i>
-          <h1 className="serif text-2xl font-bold tracking-tight">Crafted Stories</h1>
-        </div>
+    <div className="min-h-screen bg-[#FFF5F6]">
+      {/* Navigation */}
+      <nav className="flex justify-between items-center p-6 sticky top-0 bg-white/70 backdrop-blur-md z-50">
+        <h2 className="serif text-2xl font-bold cursor-pointer" onClick={() => setView('home')}>Crafted Stories</h2>
         <div className="flex gap-6 items-center">
-            <a href={`https://instagram.com/${INSTA_ID}`} target="_blank"><i data-lucide="instagram" className="w-5 h-5"></i></a>
-            <a href={`tel:+91${PHONE}`} className="bg-[#C5A059] text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">Call Us</a>
+            <div className="relative cursor-pointer" onClick={() => setView('cart')}>
+                <i data-lucide="shopping-bag" className="w-6 h-6"></i>
+                {cart.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                        {cart.length}
+                    </span>
+                )}
+            </div>
+            <button onClick={() => firebase.auth().signOut().then(() => setUser(null))} className="text-[10px] uppercase font-bold text-gray-400">Logout</button>
         </div>
       </nav>
 
-      <section className="text-center py-20 px-6 bg-white">
-        <span className="text-[#C5A059] uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Handmade Excellence</span>
-        <h2 className="serif text-5xl md:text-7xl mb-6 italic">Where hearts connect</h2>
-        <p className="max-w-xl mx-auto text-gray-400 font-light leading-relaxed">By Jyothi & Preethi Reddy. Dedicated to transforming resilience into wearable art.</p>
-        
-        <div className="mt-12 max-w-lg mx-auto">
-            <div className="bg-[#FFF5F6] p-6 rounded-2xl border border-[#C5A059]/20 shadow-sm">
-                <p className="serif text-left mb-2 italic">1. Your Shipping Details</p>
-                <textarea 
-                    className="w-full p-4 rounded-xl border-none focus:ring-1 focus:ring-[#C5A059] outline-none text-sm"
-                    placeholder="Enter Full Address..."
-                    rows="2"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                />
-            </div>
-        </div>
-      </section>
-
-      <section className="px-8 py-10">
-        <div className="flex justify-center gap-4 mb-10">
-            {["All", "Jewelry", "Resin"].map(cat => (
-                <button 
-                    key={cat} 
-                    onClick={() => setFilter(cat)}
-                    className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${filter === cat ? 'bg-[#2D2D2D] text-white' : 'bg-white text-gray-400 border border-gray-100'}`}
-                >
-                    {cat}
-                </button>
-            ))}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {filteredItems.map(p => (
-            <div key={p.id} className="product-card rounded-3xl overflow-hidden flex flex-col">
-              <div className="relative overflow-hidden group">
-                <img src={p.img} alt={p.name} className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter">{p.category}</div>
-              </div>
-              <div className="p-6">
-                <h3 className="serif text-xl mb-1">{p.name}</h3>
-                <p className="text-[#C5A059] font-bold text-lg mb-6">₹{p.price}</p>
-                <div className="space-y-3">
-                    <button onClick={() => handleOrder(p.name, p.price, true)} className="btn-luxury w-full py-4 rounded-xl font-bold text-xs uppercase tracking-widest">Order & Pay Now</button>
-                    <button onClick={() => handleOrder(p.name, p.price, false)} className="w-full py-2 text-gray-400 text-[10px] uppercase font-bold tracking-widest border-b border-transparent hover:border-gray-200">Enquire Availability</button>
+      {/* Main Home View */}
+      {view === 'home' && (
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
+          {products.map(p => (
+            <div key={p.id} className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all group">
+              <img src={p.img} className="h-80 w-full object-cover cursor-pointer hover:scale-105 transition-transform duration-500" onClick={() => {setSelectedProduct(p); setView('detail');}} />
+              <div className="p-8 text-center">
+                <h3 className="serif text-2xl mb-2">{p.name}</h3>
+                <p className="text-rose-500 font-bold mb-6">₹{p.price}</p>
+                <div className="flex gap-3">
+                    <button onClick={() => addToCart(p)} className="flex-1 border-2 border-black py-3 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all">Add to Cart</button>
+                    <button onClick={() => {setCart([p]); setView('cart');}} className="flex-1 bg-black text-white py-3 rounded-full text-[10px] font-bold uppercase tracking-widest">Buy Now</button>
                 </div>
               </div>
             </div>
           ))}
         </div>
-      </section>
+      )}
 
-      <footer className="bg-[#2D2D2D] text-white py-20 px-10 mt-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 text-center md:text-left">
-            <div>
-                <h4 className="serif text-3xl mb-6">Crafted Stories</h4>
-                <p className="text-gray-500 font-light text-sm">Every piece tells a story of survival, independence, and the bond between two sisters.</p>
-            </div>
-            <div>
-                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-6 text-[#C5A059]">Quick Contact</h4>
-                <div className="space-y-4 text-sm font-light">
-                    <a href={`tel:+91${PHONE}`} className="block hover:text-[#C5A059] transition-colors">Call: +91 {PHONE}</a>
-                    <a href={`mailto:${EMAIL}`} className="block hover:text-[#C5A059] transition-colors">Email Us</a>
-                    <a href={`https://instagram.com/${INSTA_ID}`} className="block hover:text-[#C5A059] transition-colors">Instagram</a>
+      {/* Product Detail View */}
+      {view === 'detail' && selectedProduct && (
+        <div className="p-8 max-w-4xl mx-auto">
+            <button onClick={() => setView('home')} className="mb-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400">← Back to Shop</button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-white p-8 rounded-[3rem] shadow-sm">
+                <img src={selectedProduct.img} className="w-full h-[500px] object-cover rounded-[2rem]" />
+                <div className="flex flex-col justify-center">
+                    <span className="text-rose-400 text-xs font-bold uppercase tracking-[0.2em] mb-4">{selectedProduct.category}</span>
+                    <h2 className="serif text-5xl mb-6">{selectedProduct.name}</h2>
+                    <p className="text-3xl font-light text-gray-800 mb-8">₹{selectedProduct.price}</p>
+                    <div className="mb-8 p-6 bg-rose-50 rounded-2xl italic text-gray-600 border-l-4 border-rose-300">
+                        {selectedProduct.desc}
+                    </div>
+                    <button onClick={() => addToCart(selectedProduct)} className="bg-black text-white py-5 rounded-full font-bold uppercase tracking-widest hover:scale-105 transition-transform">Add to My Collection</button>
                 </div>
             </div>
-            <div>
-                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-6 text-[#C5A059]">Location</h4>
-                <p className="text-sm font-light text-gray-500 italic">Operating from the heart of Andhra Pradesh, shipping throughout India.</p>
-            </div>
         </div>
-      </footer>
+      )}
+
+      {/* Cart & Checkout View */}
+      {view === 'cart' && (
+        <div className="p-8 max-w-2xl mx-auto">
+            <h2 className="serif text-4xl mb-10 text-center italic">Your Selection</h2>
+            {cart.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-[2rem]">
+                    <p className="text-gray-400 mb-6 uppercase tracking-widest">Your cart is empty</p>
+                    <button onClick={() => setView('home')} className="text-rose-500 font-bold underline">Go Shopping</button>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {cart.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center bg-white p-6 rounded-2xl">
+                            <span className="font-semibold">{item.name}</span>
+                            <span className="text-rose-500 font-bold tracking-tighter text-xl">₹{item.price}</span>
+                        </div>
+                    ))}
+                    <div className="mt-12 bg-white p-8 rounded-[2rem] shadow-inner border-2 border-dashed border-rose-200">
+                        <p className="serif mb-4 text-xl italic font-bold">Shipping Address</p>
+                        <textarea 
+                            className="w-full border-none bg-gray-50 p-6 rounded-2xl outline-none focus:ring-2 focus:ring-rose-200 text-sm" 
+                            placeholder="Full Name, House No, Locality, City, State, Pincode..." 
+                            rows="4"
+                            onChange={e => setAddress(e.target.value)} 
+                        />
+                    </div>
+                    {address.length > 10 && (
+                        <div className="mt-10 animate-fade-in">
+                            <div className="flex justify-between text-2xl font-bold mb-6 px-4">
+                                <span>Total Payable</span>
+                                <span>₹{cart.reduce((s, i) => s + i.price, 0)}</span>
+                            </div>
+                            <button onClick={sendOrderToWhatsApp} className="w-full bg-rose-500 text-white py-6 rounded-full font-bold text-lg shadow-xl hover:bg-rose-600 transition-all flex items-center justify-center gap-3">
+                                <i data-lucide="message-circle"></i> Confirm & Pay on WhatsApp
+                            </button>
+                            <p className="text-center mt-4 text-[10px] text-gray-400 uppercase tracking-widest font-bold">UPI Payment: {UPI_ID}</p>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+      )}
     </div>
   );
 }
