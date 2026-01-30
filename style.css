@@ -1,17 +1,18 @@
 :root {
     --gold: #C5A059;
-    --amazon-orange: #ff9900;
+    --charcoal: #1a1a1a;
 }
 
 body {
     font-family: 'Montserrat', sans-serif;
+    color: var(--charcoal);
     margin: 0;
-    background: #f1f3f6; /* Flipkart light gray background */
+    background: #fff;
 }
 
 .serif { font-family: 'Playfair Display', serif; }
 
-/* Light Resin Art Background */
+/* Dynamic Resin Background */
 .resin-bg-overlay {
     position: fixed;
     top: 0;
@@ -21,32 +22,36 @@ body {
     background-image: url('https://images.unsplash.com/photo-1599408162165-403884112e3e?auto=format&fit=crop&q=80&w=2000');
     background-size: cover;
     background-attachment: fixed;
-    opacity: 0.20; 
+    opacity: 0.12;
     z-index: -1;
+    filter: blur(5px);
 }
 
-/* Flipkart Style Card */
-.checkout-card {
-    background: #fff;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px 0 rgba(0,0,0,.08);
+/* Glassmorphism Cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.step-header {
-    background: #2874f0; /* Flipkart Blue */
+.glass-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 25px 50px rgba(197, 160, 89, 0.15);
+}
+
+/* Page Transition */
+.page-anim {
+    animation: fadeInSlide 0.7s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-luxury {
+    background: linear-gradient(135deg, #C5A059 0%, #B38E46 100%);
     color: white;
-    padding: 15px;
-    font-weight: bold;
-    text-transform: uppercase;
 }
-
-.form-input {
-    width: 100%;
-    border: 1px solid #e0e0e0;
-    padding: 12px;
-    border-radius: 2px;
-    margin-bottom: 15px;
-    outline: none;
-}
-
-.form-input:focus { border-color: #2874f0; }
