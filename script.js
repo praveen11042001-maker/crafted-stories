@@ -127,3 +127,4 @@ function App() {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
 setTimeout(() => lucide.createIcons(), 500);
+
