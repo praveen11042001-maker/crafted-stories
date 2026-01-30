@@ -9,7 +9,7 @@ const products = [
 
 function App() {
   const sendWhatsApp = (pName, pPrice) => {
-    const text = `Hi Crafted Stories! 👋%0AI want to buy: *${pName}*%0APrice: *₹${pPrice}*%0A%0APlease share details for payment to 8106676763 (PhonePe/GPay).`;
+    const text = `Hi Crafted Stories! 👋%0A%0AI would like to order: *${pName}*%0ATotal Price: *₹${pPrice}*%0A%0APlease share your UPI/QR code so I can pay via PhonePe/GPay. My shipping address is:`;
     window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
   };
 
